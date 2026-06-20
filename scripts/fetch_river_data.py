@@ -1,6 +1,23 @@
 import requests
 import pandas as pd
+import os
 from datetime import datetime
+from sqlalchemy import create_engine
+from urllib.parse import quote_plus
+from dotenv import load_dotenv
+
+load_dotenv()
+
+DB_HOST = os.getenv("SUPABASE_HOST")
+DB_DB = os.getenv("SUPABASE_DB")
+DB_USER = os.getenv("SUPABASE_USER")
+DB_PASSWORD = quote_plus(os.getenv("SUPABASE_PASSWORD"))
+DB_PORT = os.getenv("SUPABASE_PORT")
+
+engine = create_engine(
+    f"postgresql://{DB_USER}:{DB_PASSWORD}@{DB_HOST}:{DB_PORT}/{DB_DB}",
+    connect_args={"sslmode": "require"}
+)
 
 STATIONS = {
     "Hathnikund Barrage": "009-UYDDEL",
@@ -17,6 +34,7 @@ def fetch_latest_level(station_name, station_code):
 
     response = requests.get(url, headers=HEADERS)
     data = response.json()
+
     if not data or len(data) == 0:
         return {
             "station": station_name,
@@ -44,5 +62,14 @@ if __name__ == "__main__":
         results.append(result)
 
     df = pd.DataFrame(results)
+
+    # Save to CSV
     df.to_csv("data/river_data.csv", index=False)
-    print("\n✅ River data saved to data/river_data.csv")
+
+    # Save to database
+    df_db = df.copy()
+    df_db["reading_time"] = pd.to_datetime(df_db["reading_time"])
+    df_db["fetched_at"] = pd.to_datetime(df_db["fetched_at"])
+    df_db.to_sql("river_levels", engine, if_exists="append", index=False)
+
+    print("\n✅ River data saved to CSV and database")
