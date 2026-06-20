@@ -8,7 +8,7 @@ HEADERS = {
 station_code = "009-UYDDEL"  # Hathnikund Barrage
 
 end_date = datetime.now()
-start_date = end_date - timedelta(days=90)
+start_date = end_date - timedelta(days=365)
 
 start_str = start_date.strftime("%Y-%m-%dT%H:%M:%S.000")
 end_str = end_date.strftime("%Y-%m-%dT%H:%M:%S.000")

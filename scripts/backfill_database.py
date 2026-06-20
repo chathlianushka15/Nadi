@@ -46,7 +46,7 @@ if __name__ == "__main__":
 
     for station_name, station_code in STATIONS.items():
         print(f"Fetching 90 days of history for {station_name}...")
-        data = fetch_history(station_code, days_back=90)
+        data = fetch_history(station_code, days_back=365)
         print(f"  -> {len(data)} records found")
 
         for record in data:
